@@ -25,6 +25,7 @@
   <plugin name="cordova-plugin-splashscreen" spec="^3.2.1"/>
   <plugin name="cordova-plugin-statusbar" spec="^2.1.2"/>
   <plugin name="ionic-plugin-keyboard" spec="^2.0.1"/>
+  <plugin name="cordova-plugin-media-capture" source="https://github.com/apache/cordova-plugin-media-capture.git">
   <platform name="ios">
     <icon src="resources/ios/icon/icon.png" width="57" height="57"/>
     <icon src="resources/ios/icon/icon@2x.png" width="114" height="114"/>
