@@ -1,0 +1,12 @@
+<ion-view view-title="Add a Device">
+  <ion-content>
+    <ion-list>
+      <ion-item ng-repeat="playlist in playlists" href="#/app{{playlist.verificationPage}}">
+        {{playlist.title}}
+        <span class='item-note'>
+          <button class="button button-outline icon-right ion-chevron-right button-balanced">verify</button>
+        </span>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-view>
