@@ -78,7 +78,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
 .controller('VerifyHueCtrl', function($scope, $http, $window) {
   // var resp = [{"id":"001788fffe09460a","internalipaddress":"192.168.1.6"}];
-  $http.get('http://localhost:8100/api/nupnp', {}).then(function(resp){
+  $http.get('http://www.meethue.com/api/nupnp', {}).then(function(resp){
     
     var phillipsHueData = {};
     
