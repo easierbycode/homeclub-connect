@@ -1,3 +1,10 @@
+var fb = new Firebase( 'https://homeclub-connect.firebaseio.com' );
+
+// TODO: remove this temp hack once login is in place
+var currentUser = {
+  _id: '5550f6f9f3b527688eea24de'
+};
+
 angular.module('starter.controllers', ['ngCordova'])
 
 .controller('AppCtrl', function($scope, $ionicModal, $timeout) {
@@ -45,7 +52,7 @@ angular.module('starter.controllers', ['ngCordova'])
   $scope.playlists = [
     { title: 'Amazon Echo', id: 1, verified: false, verificationPage: '/verify-echo' },
     { title: 'Nest Smoke Detector', id: 2 },
-    { title: 'Phillips Hue', id: 3 },
+    { title: 'Phillips Hue', id: 3, verificationPage: '/verify-hue' },
     { title: 'Scout Alarm', id: 4 }
   ];
 })
@@ -55,12 +62,55 @@ angular.module('starter.controllers', ['ngCordova'])
 
 .controller('VerifyEchoCtrl', function($scope, $cordovaCapture) {
     $scope.record = function() {
-        var options = { limit:3, duration:10 };
+        var options = { duration:10 };
         
         $cordovaCapture.captureVideo(options).then(function( videoData ) {
+          
+          amazonEchoData = { verifyDate: new Date().getTime() };
             
-            console.log( videoData );
+            // console.log( videoData );
+            amazonEchoData.videoProof = videoData;
+            fb.child( currentUser._id ).child('thirdPartyDevices').set( { amazonEcho: amazonEchoData } );
             
         }, function( err ) {})
     };
+})
+
+.controller('VerifyHueCtrl', function($scope, $http, $window) {
+  // var resp = [{"id":"001788fffe09460a","internalipaddress":"192.168.1.6"}];
+  $http.get('http://www.meethue.com/api/nupnp', {}).then(function(resp){
+    // console.log( resp );
+    
+    var phillipsHueData = {};
+    
+    var hueInternalIp = phillipsHueData.internalIp = resp[0] && resp[0].internalipaddress;
+    if ( hueInternalIp ) {
+      
+      var hueInternalApiUrl = 'http://' + hueInternalIp + '/api';
+      
+      $http.post( hueInternalApiUrl, {devicetype:"homeclub_connect#mobile testuser"} ).then(function( hueResp ) {
+        
+        if ( hueResp.data[0] && hueResp.data[0].error ) {
+          var errorText = hueResp.data[0].error.description;
+          return alert(errorText);
+        }
+        
+        if ( hueResp.data[0] && hueResp.data[0].success ) {
+          var hueUsername = phillipsHueData.username = hueResp.data[0].success.username;
+          
+          $http.get(hueInternalApiUrl+hueUsername+'/schedules', {}).then(function( schedulesResp ) {
+            console.log( schedulesResp.data );
+            phillipsHueData.schedules = schedulesResp.data;
+            
+            $http.get(hueInternalApiUrl+hueUsername+'/lights', {}).then(function( lightsResp ) {
+              console.log( lightsResp.data );
+              phillipsHueData.lights = lightsResp.data;
+              alert( 'Found ' + Object.keys(lightsResp.data).length + ' lights with ' + Object.keys( schedulesResp.data ).length + ' schedules');
+              fb.child( currentUser._id ).child('thirdPartyDevices').set( {phillipsHue: phillipsHueData} );
+            })
+          })
+        }
+      })
+    }
+  })
 })
