@@ -148,7 +148,9 @@ angular.module('starter.controllers', ['ngCordova'])
                       ref.on('value', function(snapshot) {
                         // console.log(snapshot.val());
                         if(Object.keys($scope.nestData).length == 0) alert('Nest Firebase value received!');
-                        $scope.nestData = snapshot.val();
+                        $scope.$apply(function(){
+                          $scope.nestData = snapshot.val();
+                        })
                       });
                     })
                     .error(function(data, status) {
