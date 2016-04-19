@@ -118,23 +118,23 @@ angular.module('starter.controllers', ['ngCordova'])
   })
 })
 
-.controller( 'VerifyNestCtrl', function( $cordovaInAppBrowser, $http, $location, $scope ) {
+.controller( 'VerifyNestCtrl', function( $cordovaInAppBrowser, $http, $location, $rootScope, $scope ) {
   
   $scope.accessToken = accessToken;
   
   $scope.login = function() {
         // var ref = window.open('https://home.nest.com/login/oauth2?client_id=829579eb-682c-4e44-b69b-d40df3ad9ab2&state=' + currentUser._id + new Date().getTime(), '_blank', 'location=no');
         var options = {
-          location: 'yes',
+          location: 'no',
           clearcache: 'yes',
           toolbar: 'no'
         };
         
         $cordovaInAppBrowser.open('https://home.nest.com/login/oauth2?client_id=829579eb-682c-4e44-b69b-d40df3ad9ab2&state=' + currentUser._id + new Date().getTime(), '_blank', options);
         
-        function getCodeFromUrl(e, event) { 
+        $scope.getCodeFromUrl = function(e, event) { 
             if((event.url).startsWith("https://homeclub.us/auth/nest/callback")) {
-                requestToken = (event.url).split("code=")[1];
+                requestToken = $scope.requestToken = (event.url).split("code=")[1];
                 $http({method: "post", url: "https://api.home.nest.com/oauth2/access_token", data: "client_id=" + clientId + "&client_secret=" + clientSecret + "&grant_type=authorization_code" + "&code=" + requestToken })
                     .success(function(data) {
                       console.log( data );
@@ -145,14 +145,15 @@ angular.module('starter.controllers', ['ngCordova'])
                     .error(function(data, status) {
                         alert("ERROR: " + data);
                     });
-                ref.close();
+
+                $cordovaInAppBrowser.close();
             }
         }
         
         // ref.addEventListener('loadstart', getCodeFromUrl);
         // ref.addEventListener('loaderror', getCodeFromUrl);
-        $rootScope.$on('$cordovaInAppBrowser:loadstart', getCodeFromUrl);
-        $rootScope.$on('$cordovaInAppBrowser:loaderror', getCodeFromUrl);
+        $rootScope.$on('$cordovaInAppBrowser:loadstart', $scope.getCodeFromUrl);
+        $rootScope.$on('$cordovaInAppBrowser:loaderror', $scope.getCodeFromUrl);
     }
     
     if (typeof String.prototype.startsWith != 'function') {
