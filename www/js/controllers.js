@@ -140,6 +140,13 @@ angular.module('starter.controllers', ['ngCordova'])
                       accessToken = $scope.accessToken = data.access_token;
                       alert( 'access token: ', accessToken );
                       // $location.path("/app");
+                      
+                      var ref = new Firebase('wss://developer-api.nest.com');
+                      ref.auth(accessToken);
+                      ref.on('value', function(snapshot) {
+                        // console.log(snapshot.val());
+                        $scope.nestData = snapshot.val();
+                      });
                     })
                     .error(function(data, status) {
                       alert("ERROR: " + data);
