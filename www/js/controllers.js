@@ -122,6 +122,8 @@ angular.module('starter.controllers', ['ngCordova'])
   
   $http.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
   
+  $scope.nestData = {};
+  
   $scope.login = function() {
         // var ref = window.open('https://home.nest.com/login/oauth2?client_id=829579eb-682c-4e44-b69b-d40df3ad9ab2&state=' + currentUser._id + new Date().getTime(), '_blank', 'location=no');
         var options = {
@@ -145,6 +147,7 @@ angular.module('starter.controllers', ['ngCordova'])
                       ref.auth(accessToken);
                       ref.on('value', function(snapshot) {
                         // console.log(snapshot.val());
+                        if(Object.keys($scope.nestData).length == 0) alert('Nest Firebase value received!');
                         $scope.nestData = snapshot.val();
                       });
                     })
