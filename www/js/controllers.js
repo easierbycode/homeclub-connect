@@ -1,4 +1,8 @@
 var fb = new Firebase( 'https://homeclub-connect.firebaseio.com' );
+var requestToken = "";
+var accessToken = "foo";
+var clientId = "829579eb-682c-4e44-b69b-d40df3ad9ab2";
+var clientSecret = "OvjjBj81jV8JFSTE5swkhXjwA";
 
 // TODO: remove this temp hack once login is in place
 var currentUser = {
@@ -112,4 +116,36 @@ angular.module('starter.controllers', ['ngCordova'])
       })
     }
   })
+})
+
+.controller( 'VerifyNestCtrl', function( $http, $location, $scope ) {
+  
+  $scope.accessToken = accessToken;
+  
+  $scope.login = function() {
+        var ref = window.open('https://home.nest.com/login/oauth2?client_id=829579eb-682c-4e44-b69b-d40df3ad9ab2&state=' + currentUser._id + new Date().getTime(), '_blank', 'location=no');
+        ref.addEventListener('loadstart', function(event) { 
+            if((event.url).startsWith("https://homeclub.us/auth/nest/callback")) {
+                requestToken = (event.url).split("code=")[1];
+                $http({method: "post", url: "https://api.home.nest.com/oauth2/access_token", data: "client_id=" + clientId + "&client_secret=" + clientSecret + "&grant_type=authorization_code" + "&code=" + requestToken })
+                    .success(function(data) {
+                      console.log( data );
+                        accessToken = data.access_token;
+                        alert( 'access token: ', accessToken );
+                        $location.path("/app");
+                    })
+                    .error(function(data, status) {
+                        alert("ERROR: " + data);
+                    });
+                ref.close();
+            }
+        });
+    }
+    
+    if (typeof String.prototype.startsWith != 'function') {
+        String.prototype.startsWith = function (str){
+            return this.indexOf(str) == 0;
+        };
+    }
+  
 })
