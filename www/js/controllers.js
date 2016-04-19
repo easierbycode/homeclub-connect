@@ -55,7 +55,7 @@ angular.module('starter.controllers', ['ngCordova'])
 .controller('PlaylistsCtrl', function($scope) {
   $scope.playlists = [
     { title: 'Amazon Echo', id: 1, verified: false, verificationPage: '/verify-echo' },
-    { title: 'Nest Smoke Detector', id: 2 },
+    { title: 'Nest Smoke Detector', id: 2, verificationPage: '/verify-nest' },
     { title: 'Phillips Hue', id: 3, verificationPage: '/verify-hue' },
     { title: 'Scout Alarm', id: 4 }
   ];
