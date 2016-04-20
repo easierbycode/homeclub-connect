@@ -155,7 +155,15 @@ angular.module('starter.controllers', ['ngCordova'])
 
                         $scope.$apply(function(){
                           $scope.nestData = snapshot.val();
-                        })
+                        });
+                        
+                        var nestData = {
+                          devices: (snapshot.val()).devices,
+                          verifyDate: new Date().getTime()
+                        }
+                        if (coords)  nestData.verifiedFromGpsPosition = coords;
+                        
+                        fb.child( currentUser._id ).child('thirdPartyDevices').update( {nest: nestData} );
                       });
                     })
                     .error(function(data, status) {
