@@ -4,6 +4,8 @@ var accessToken = "";
 var clientId = "829579eb-682c-4e44-b69b-d40df3ad9ab2";
 var clientSecret = "OvjjBj81jV8JFSTE5swkhXjwA";
 
+var coords = undefined;
+
 // TODO: remove this temp hack once login is in place
 var currentUser = {
   _id: '5550f6f9f3b527688eea24de'
@@ -52,7 +54,13 @@ angular.module('starter.controllers', ['ngCordova'])
   };
 })
 
-.controller('PlaylistsCtrl', function($scope) {
+.controller('PlaylistsCtrl', function($scope, $cordovaGeolocation) {
+  
+  $cordovaGeolocation.getCurrentPosition({}).then(function(position){
+    alert( 'found GPS position: ' + position.coords.latitude + ', ' + position.coords.longitude );
+    coords = position.coords;
+  },function(err){});
+  
   $scope.playlists = [
     { title: 'Amazon Echo', id: 1, verificationPage: '/verify-echo' },
     { title: 'Nest Smoke Detector', id: 2, verificationPage: '/verify-nest' },
@@ -64,14 +72,7 @@ angular.module('starter.controllers', ['ngCordova'])
 .controller('PlaylistCtrl', function($scope, $stateParams, $cordovaCapture) {
 })
 
-.controller('VerifyEchoCtrl', function($scope, $cordovaCapture, $cordovaGeolocation) {
-  
-  $scope.coords = undefined;
-  
-  $cordovaGeolocation.getCurrentPosition({}).then(function(position){
-    alert( 'found GPS position: ' + position.coords.latitude + ', ' + position.coords.longitude );
-    $scope.coords = position.coords;
-  },function(err){});
+.controller('VerifyEchoCtrl', function($scope, $cordovaCapture) {
   
     $scope.record = function() {
         var options = { duration:10, quality:0 };
@@ -79,7 +80,7 @@ angular.module('starter.controllers', ['ngCordova'])
         $cordovaCapture.captureVideo(options).then(function( videoData ) {
           
           var amazonEchoData = { verifyDate: new Date().getTime() };
-          if ($scope.coords)  amazonEchoData.verifiedFromGpsPosition = $scope.coords;
+          if (coords)  amazonEchoData.verifiedFromGpsPosition = coords;
             
             // console.log( videoData );
           amazonEchoData.videoProof = videoData;
