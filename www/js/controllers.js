@@ -66,9 +66,12 @@ angular.module('starter.controllers', ['ngCordova'])
 
 .controller('VerifyEchoCtrl', function($scope, $cordovaCapture, $cordovaGeolocation) {
   
+  $scope.coords = undefined;
+  
   $cordovaGeolocation.getCurrentPosition({}).then(function(position){
+    alert( 'found GPS position: ' + position.coords.latitude + ', ' + position.coords.longitude );
     $scope.coords = position.coords;
-  },function(err){})
+  },function(err){});
   
     $scope.record = function() {
         var options = { duration:10, quality:0 };
