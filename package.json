@@ -22,7 +22,8 @@
     "cordova-plugin-statusbar",
     "ionic-plugin-keyboard",
     "cordova-plugin-media-capture",
-    "cordova-plugin-inappbrowser"
+    "cordova-plugin-inappbrowser",
+    "cordova-plugin-geolocation"
   ],
   "cordovaPlatforms": [
     "ios",

@@ -54,7 +54,7 @@ angular.module('starter.controllers', ['ngCordova'])
 
 .controller('PlaylistsCtrl', function($scope) {
   $scope.playlists = [
-    { title: 'Amazon Echo', id: 1, verified: false, verificationPage: '/verify-echo' },
+    { title: 'Amazon Echo', id: 1, verificationPage: '/verify-echo' },
     { title: 'Nest Smoke Detector', id: 2, verificationPage: '/verify-nest' },
     { title: 'Phillips Hue', id: 3, verificationPage: '/verify-hue' },
     { title: 'Scout Alarm', id: 4 }
@@ -64,17 +64,23 @@ angular.module('starter.controllers', ['ngCordova'])
 .controller('PlaylistCtrl', function($scope, $stateParams, $cordovaCapture) {
 })
 
-.controller('VerifyEchoCtrl', function($scope, $cordovaCapture) {
+.controller('VerifyEchoCtrl', function($scope, $cordovaCapture, $cordovaGeolocation) {
+  
+  $cordovaGeolocation.getCurrentPosition({}).then(function(position){
+    $scope.coords = position.coords;
+  },function(err){})
+  
     $scope.record = function() {
-        var options = { duration:10 };
+        var options = { duration:10, quality:0 };
         
         $cordovaCapture.captureVideo(options).then(function( videoData ) {
           
-          amazonEchoData = { verifyDate: new Date().getTime() };
+          var amazonEchoData = { verifyDate: new Date().getTime() };
+          if ($scope.coords)  amazonEchoData.verifiedFromGpsPosition = $scope.coords;
             
             // console.log( videoData );
-            amazonEchoData.videoProof = videoData;
-            fb.child( currentUser._id ).child('thirdPartyDevices').set( { amazonEcho: amazonEchoData } );
+          amazonEchoData.videoProof = videoData;
+          fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
             
         }, function( err ) {})
     };
@@ -82,40 +88,36 @@ angular.module('starter.controllers', ['ngCordova'])
 
 .controller('VerifyHueCtrl', function($scope, $http, $window) {
   // var resp = [{"id":"001788fffe09460a","internalipaddress":"192.168.1.6"}];
-  $http.get('http://www.meethue.com/api/nupnp', {}).then(function(resp){
-    
-    var phillipsHueData = {};
-    
-    var hueInternalIp = phillipsHueData.internalIp = resp.data[0] && resp.data[0].internalipaddress;
-    if ( hueInternalIp ) {
+  // http://www.meethue.com/api/nupnp
+  $scope.findBridge = function() {
+    $http.get('/api/nupnp', {}).then(function(resp){
       
-      var hueInternalApiUrl = 'http://' + hueInternalIp + '/api';
-      
-      $http.post( hueInternalApiUrl, {devicetype:"homeclub_connect#mobile testuser"} ).then(function( hueResp ) {
+      var hueInternalIp = resp.data[0] && resp.data[0].internalipaddress;
+      if ( hueInternalIp ) {
         
-        if ( hueResp.data[0] && hueResp.data[0].error ) {
-          var errorText = hueResp.data[0].error.description;
-          return alert(errorText);
-        }
+        var hueInternalApiUrl = 'http://' + hueInternalIp + '/api/';
         
-        if ( hueResp.data[0] && hueResp.data[0].success ) {
-          var hueUsername = phillipsHueData.username = hueResp.data[0].success.username;
+        $http.post( hueInternalApiUrl, {devicetype:"homeclub_connect#mobile testuser"} ).then(function( hueResp ) {
           
-          $http.get(hueInternalApiUrl+hueUsername+'/schedules', {}).then(function( schedulesResp ) {
-            console.log( schedulesResp.data );
-            phillipsHueData.schedules = schedulesResp.data;
+          if ( hueResp.data[0] && hueResp.data[0].error ) {
+            var errorText = hueResp.data[0].error.description;
+            return alert(errorText);
+          }
+          
+          if ( hueResp.data[0] && hueResp.data[0].success ) {
+            var hueUsername = hueResp.data[0].success.username;
             
-            $http.get(hueInternalApiUrl+hueUsername+'/lights', {}).then(function( lightsResp ) {
-              console.log( lightsResp.data );
-              phillipsHueData.lights = lightsResp.data;
-              alert( 'Found ' + Object.keys(lightsResp.data).length + ' lights with ' + Object.keys( schedulesResp.data ).length + ' schedules');
-              fb.child( currentUser._id ).child('thirdPartyDevices').set( {phillipsHue: phillipsHueData} );
+            $http.get(hueInternalApiUrl+hueUsername, {}).then(function( fullStateResp ) {
+              alert( 'Found ' + Object.keys(fullStateResp.data.lights).length + ' lights with ' + Object.keys( fullStateResp.data.schedules ).length + ' schedules');
+              fb.child( currentUser._id ).child('thirdPartyDevices').update( {phillipsHue: fullStateResp.data} );
             })
-          })
-        }
-      })
-    }
-  })
+          }
+        })
+      } else {
+        alert( "No bridge found.  Please ensure you're connected to the same Wi-Fi network." );
+      }
+    })
+  }
 })
 
 .controller( 'VerifyNestCtrl', function( $cordovaInAppBrowser, $http, $location, $rootScope, $scope ) {
@@ -125,7 +127,7 @@ angular.module('starter.controllers', ['ngCordova'])
   $scope.nestData = {};
   
   $scope.login = function() {
-        // var ref = window.open('https://home.nest.com/login/oauth2?client_id=829579eb-682c-4e44-b69b-d40df3ad9ab2&state=' + currentUser._id + new Date().getTime(), '_blank', 'location=no');
+
         var options = {
           location: 'no',
           clearcache: 'yes',
@@ -146,8 +148,7 @@ angular.module('starter.controllers', ['ngCordova'])
                       var ref = new Firebase('wss://developer-api.nest.com');
                       ref.auth(accessToken);
                       ref.on('value', function(snapshot) {
-                        // console.log(snapshot.val());
-                        if(Object.keys($scope.nestData).length == 0) alert('Nest Firebase value received!');
+
                         $scope.$apply(function(){
                           $scope.nestData = snapshot.val();
                         })
@@ -160,9 +161,7 @@ angular.module('starter.controllers', ['ngCordova'])
                 $cordovaInAppBrowser.close();
             }
         }
-        
-        // ref.addEventListener('loadstart', getCodeFromUrl);
-        // ref.addEventListener('loaderror', getCodeFromUrl);
+
         $rootScope.$on('$cordovaInAppBrowser:loadstart', $scope.getCodeFromUrl);
         $rootScope.$on('$cordovaInAppBrowser:loaderror', $scope.getCodeFromUrl);
     }
