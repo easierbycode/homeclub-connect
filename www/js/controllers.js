@@ -4,14 +4,23 @@ var accessToken = "";
 var clientId = "829579eb-682c-4e44-b69b-d40df3ad9ab2";
 var clientSecret = "OvjjBj81jV8JFSTE5swkhXjwA";
 
-var coords = undefined;
-
 // TODO: remove this temp hack once login is in place
 var currentUser = {
   _id: '5550f6f9f3b527688eea24de'
 };
 
 angular.module('starter.controllers', ['ngCordova'])
+
+.factory('LatestGpsCoordinates', function() {
+  
+  var coords;
+  
+  return {
+    get: function() { return coords },
+    set: function( coords ) { coords = coords }
+  };
+  
+})
 
 .controller('AppCtrl', function($scope, $ionicModal, $timeout) {
 
@@ -54,11 +63,11 @@ angular.module('starter.controllers', ['ngCordova'])
   };
 })
 
-.controller('PlaylistsCtrl', function($scope, $cordovaGeolocation) {
+.controller('PlaylistsCtrl', function($scope, LatestGpsCoordinates) {
   
   $cordovaGeolocation.getCurrentPosition({}).then(function(position){
     alert( 'found GPS position: ' + position.coords.latitude + ', ' + position.coords.longitude );
-    coords = position.coords;
+    LatestGpsCoordinates.set( position.coords );
   },function(err){});
   
   $scope.playlists = [
@@ -69,7 +78,7 @@ angular.module('starter.controllers', ['ngCordova'])
   ];
 })
 
-.controller('PlaylistCtrl', function($scope, $stateParams, $cordovaCapture) {
+.controller('PlaylistCtrl', function($scope, $stateParams, $cordovaCapture, LatestGpsCoordinates) {
 })
 
 .controller('VerifyEchoCtrl', function($scope, $cordovaCapture) {
@@ -80,7 +89,7 @@ angular.module('starter.controllers', ['ngCordova'])
         $cordovaCapture.captureVideo(options).then(function( videoData ) {
           
           var amazonEchoData = { verifyDate: new Date().getTime() };
-          if (coords)  amazonEchoData.verifiedFromGpsPosition = coords;
+          if (LatestGpsCoordinates.get())  amazonEchoData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
             
             // console.log( videoData );
           amazonEchoData.videoProof = videoData;
@@ -124,7 +133,7 @@ angular.module('starter.controllers', ['ngCordova'])
   }
 })
 
-.controller( 'VerifyNestCtrl', function( $cordovaInAppBrowser, $http, $location, $rootScope, $scope ) {
+.controller( 'VerifyNestCtrl', function( $cordovaInAppBrowser, $http, $location, $rootScope, $scope, LatestGpsCoordinates ) {
   
   $http.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
   
@@ -161,7 +170,7 @@ angular.module('starter.controllers', ['ngCordova'])
                           devices: (snapshot.val()).devices,
                           verifyDate: new Date().getTime()
                         }
-                        if (coords)  nestData.verifiedFromGpsPosition = coords;
+                        if (LatestGpsCoordinates.get())  nestData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
                         
                         fb.child( currentUser._id ).child('thirdPartyDevices').update( {nest: nestData} );
                       });
