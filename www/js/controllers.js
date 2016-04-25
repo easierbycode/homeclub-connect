@@ -85,6 +85,22 @@ angular.module('starter.controllers', ['ngCordova'])
 
 .controller('VerifyEchoCtrl', function($scope, $cordovaCapture, $cordovaFileTransfer) {
   
+    $scope.upload = function( fullPath ) {
+      var headers = {
+            params: {
+              upload_preset : 'sample_80bc56d56ad5be84b8180d0e1c4d0f186e1f41ce'
+            }
+          }; 
+          
+          $cordovaFileTransfer.upload('https://api.cloudinary.com/v1_1/dujip8nqb/video/upload', fullPath, headers)
+          .then(function(result){
+            alert( 'upload complete' );
+          }
+          ,function(err){
+            alert( 'ERR: upload failed' );
+          })
+    }
+
     $scope.record = function() {
         var options = { duration:10, quality:0 };
         
@@ -97,19 +113,9 @@ angular.module('starter.controllers', ['ngCordova'])
           amazonEchoData.videoProof = videoData;
           fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
           
-          var headers = {
-            params: {
-              upload_preset : 'sample_80bc56d56ad5be84b8180d0e1c4d0f186e1f41ce'
-            }
-          }; 
+          alert( 'about to upload: ' + videoData[0].localURL );
           
-          $cordovaFileTransfer.upload('https://api.cloudinary.com/v1_1/dujip8nqb', videoData[0].fullPath, headers)
-          .then(function(result){
-            alert( 'upload complete' );
-          }
-          ,function(err){
-            alert( 'ERR: ' + err );
-          })
+          $scope.upload( videoData[0].localURL );
             
         }, function( err ) {})
     };
