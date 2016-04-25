@@ -83,7 +83,7 @@ angular.module('starter.controllers', ['ngCordova'])
 .controller('PlaylistCtrl', function($scope, $stateParams, $cordovaCapture, LatestGpsCoordinates) {
 })
 
-.controller('VerifyEchoCtrl', function($scope, $cordovaCapture, $cordovaFileTransfer) {
+.controller('VerifyEchoCtrl', function($scope, $cordovaCapture, $cordovaFileTransfer, LatestGpsCoordinates) {
   
     $scope.upload = function( fullPath ) {
       var headers = {
