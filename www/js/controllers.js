@@ -85,6 +85,8 @@ angular.module('starter.controllers', ['ngCordova'])
 
 .controller('VerifyEchoCtrl', function($scope, $cordovaCapture, $cordovaFileTransfer, LatestGpsCoordinates) {
   
+    $scope.uploadResponse = undefined;
+
     $scope.upload = function( fullPath ) {
       var headers = {
             params: {
@@ -95,6 +97,7 @@ angular.module('starter.controllers', ['ngCordova'])
           $cordovaFileTransfer.upload('https://api.cloudinary.com/v1_1/dujip8nqb/video/upload', fullPath, headers)
           .then(function(result){
             alert( 'upload complete' );
+            $scope.uploadResponse = result;
           }
           ,function(err){
             alert( 'ERR: upload failed' );
@@ -112,8 +115,6 @@ angular.module('starter.controllers', ['ngCordova'])
             // console.log( videoData );
           amazonEchoData.videoProof = videoData;
           fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
-          
-          alert( 'about to upload: ' + videoData[0].localURL );
           
           $scope.upload( videoData[0].localURL );
             
