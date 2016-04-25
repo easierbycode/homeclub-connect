@@ -13,16 +13,23 @@ angular.module('starter.controllers', ['ngCordova'])
 
 .factory('LatestGpsCoordinates', function() {
   
-  var coords;
+  var position = {};
   
   return {
-    get: function() { return coords },
-    set: function( coords ) { coords = coords }
+    get: function() { return position.coords },
+    set: function( coords ) { position.coords = {
+      latitude: coords.latitude,
+      longitude: coords.longitude
+    } }
   };
   
 })
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
+.controller('AppCtrl', function($cordovaGeolocation, $scope, $ionicModal, $timeout, LatestGpsCoordinates) {
+
+  $cordovaGeolocation.getCurrentPosition({}).then(function(position){
+    LatestGpsCoordinates.set( position.coords );
+  },function(err){});
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -63,12 +70,7 @@ angular.module('starter.controllers', ['ngCordova'])
   };
 })
 
-.controller('PlaylistsCtrl', function($scope, LatestGpsCoordinates) {
-  
-  $cordovaGeolocation.getCurrentPosition({}).then(function(position){
-    alert( 'found GPS position: ' + position.coords.latitude + ', ' + position.coords.longitude );
-    LatestGpsCoordinates.set( position.coords );
-  },function(err){});
+.controller('PlaylistsCtrl', function($scope) {
   
   $scope.playlists = [
     { title: 'Amazon Echo', id: 1, verificationPage: '/verify-echo' },
@@ -81,7 +83,7 @@ angular.module('starter.controllers', ['ngCordova'])
 .controller('PlaylistCtrl', function($scope, $stateParams, $cordovaCapture, LatestGpsCoordinates) {
 })
 
-.controller('VerifyEchoCtrl', function($scope, $cordovaCapture) {
+.controller('VerifyEchoCtrl', function($scope, $cordovaCapture, $cordovaFileTransfer) {
   
     $scope.record = function() {
         var options = { duration:10, quality:0 };
@@ -94,16 +96,29 @@ angular.module('starter.controllers', ['ngCordova'])
             // console.log( videoData );
           amazonEchoData.videoProof = videoData;
           fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
+          
+          var headers = {
+            params: {
+              upload_preset : 'sample_80bc56d56ad5be84b8180d0e1c4d0f186e1f41ce'
+            }
+          }; 
+          
+          $cordovaFileTransfer.upload('https://api.cloudinary.com/v1_1/dujip8nqb', videoData[0].fullPath, headers)
+          .then(function(result){
+            alert( 'upload complete' );
+          }
+          ,function(err){
+            alert( 'ERR: ' + err );
+          })
             
         }, function( err ) {})
     };
 })
 
-.controller('VerifyHueCtrl', function($scope, $http, $window) {
-  // var resp = [{"id":"001788fffe09460a","internalipaddress":"192.168.1.6"}];
-  // http://www.meethue.com/api/nupnp
+.controller('VerifyHueCtrl', function($scope, $http, $window, LatestGpsCoordinates) {
+
   $scope.findBridge = function() {
-    $http.get('/api/nupnp', {}).then(function(resp){
+    $http.get('http://www.meethue.com/api/nupnp', {}).then(function(resp){
       
       var hueInternalIp = resp.data[0] && resp.data[0].internalipaddress;
       if ( hueInternalIp ) {
@@ -122,6 +137,10 @@ angular.module('starter.controllers', ['ngCordova'])
             
             $http.get(hueInternalApiUrl+hueUsername, {}).then(function( fullStateResp ) {
               alert( 'Found ' + Object.keys(fullStateResp.data.lights).length + ' lights with ' + Object.keys( fullStateResp.data.schedules ).length + ' schedules');
+              
+              fullStateResp.data.verifyDate = new Date().getTime();
+              if (LatestGpsCoordinates.get())  fullStateResp.data.verifiedFromGpsPosition = LatestGpsCoordinates.get();
+              
               fb.child( currentUser._id ).child('thirdPartyDevices').update( {phillipsHue: fullStateResp.data} );
             })
           }
@@ -137,7 +156,7 @@ angular.module('starter.controllers', ['ngCordova'])
   
   $http.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
   
-  $scope.nestData = {};
+  // $scope.nestData = {};
   
   $scope.login = function() {
 
@@ -162,9 +181,9 @@ angular.module('starter.controllers', ['ngCordova'])
                       ref.auth(accessToken);
                       ref.on('value', function(snapshot) {
 
-                        $scope.$apply(function(){
-                          $scope.nestData = snapshot.val();
-                        });
+                        // $scope.$apply(function(){
+                        //   $scope.nestData = snapshot.val();
+                        // });
                         
                         var nestData = {
                           devices: (snapshot.val()).devices,

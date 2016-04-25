@@ -23,7 +23,8 @@
     "ionic-plugin-keyboard",
     "cordova-plugin-media-capture",
     "cordova-plugin-inappbrowser",
-    "cordova-plugin-geolocation"
+    "cordova-plugin-geolocation",
+    "cordova-plugin-file-transfer"
   ],
   "cordovaPlatforms": [
     "ios",
