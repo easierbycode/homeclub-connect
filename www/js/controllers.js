@@ -98,6 +98,15 @@ angular.module('starter.controllers', ['ngCordova'])
           .then(function(result){
             alert( 'upload complete' );
             $scope.uploadResponse = JSON.parse(decodeURIComponent(result.response));
+            
+            var amazonEchoData = {
+              verifyDate: new Date().getTime(),
+              videoUrl: $scope.uploadResponse.url
+            };
+            
+            if (LatestGpsCoordinates.get())  amazonEchoData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
+            
+            fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
           }
           ,function(err){
             alert( 'ERR: upload failed' );
@@ -109,11 +118,11 @@ angular.module('starter.controllers', ['ngCordova'])
         
         $cordovaCapture.captureVideo(options).then(function( videoData ) {
           
-          var amazonEchoData = { verifyDate: new Date().getTime() };
-          if (LatestGpsCoordinates.get())  amazonEchoData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
+          // var amazonEchoData = { verifyDate: new Date().getTime() };
+          // if (LatestGpsCoordinates.get())  amazonEchoData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
             
             // console.log( videoData );
-          amazonEchoData.videoProof = videoData;
+          // amazonEchoData.videoProof = videoData;
           // fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
           
           $scope.upload( videoData[0].localURL );
