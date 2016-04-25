@@ -97,7 +97,7 @@ angular.module('starter.controllers', ['ngCordova'])
           $cordovaFileTransfer.upload('https://api.cloudinary.com/v1_1/dujip8nqb/video/upload', fullPath, headers)
           .then(function(result){
             alert( 'upload complete' );
-            $scope.uploadResponse = result;
+            $scope.uploadResponse = JSON.parse(decodeURIComponent(result.response));
           }
           ,function(err){
             alert( 'ERR: upload failed' );
@@ -113,10 +113,29 @@ angular.module('starter.controllers', ['ngCordova'])
           if (LatestGpsCoordinates.get())  amazonEchoData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
             
             // console.log( videoData );
-          amazonEchoData.videoProof = videoData;
-          fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
+          // amazonEchoData.videoProof = videoData;
+          // fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
           
-          $scope.upload( videoData[0].localURL );
+          // $scope.upload( videoData[0].localURL );
+          
+          var headers = {
+            params: {
+              upload_preset : 'sample_80bc56d56ad5be84b8180d0e1c4d0f186e1f41ce'
+            }
+          }; 
+          
+          $cordovaFileTransfer.upload('https://api.cloudinary.com/v1_1/dujip8nqb/video/upload', fullPath, headers)
+          .then(function(result){
+            alert( 'upload complete' );
+            var uploadResponse = JSON.parse(decodeURIComponent(result.response));
+            
+            amazonEchoData.videoUrl = uploadResponse.url;
+            
+            fb.child( currentUser._id ).child('thirdPartyDevices').update( { amazonEcho: amazonEchoData } );
+          }
+          ,function(err){
+            alert( 'ERR: upload failed' );
+          })
             
         }, function( err ) {})
     };
