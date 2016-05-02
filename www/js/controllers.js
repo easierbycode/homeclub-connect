@@ -76,8 +76,26 @@ angular.module('starter.controllers', ['ngCordova'])
     { title: 'Amazon Echo', id: 1, verificationPage: '/verify-echo' },
     { title: 'Nest Smoke Detector', id: 2, verificationPage: '/verify-nest' },
     { title: 'Phillips Hue', id: 3, verificationPage: '/verify-hue' },
-    { title: 'Scout Alarm', id: 4 }
+    { title: 'Scout Alarm', id: 4, verificationPage: '/verify-scout' }
   ];
+})
+
+.controller('VerifyScoutCtrl', function($scope, $cordovaBarcodeScanner) {
+  
+  $scope.scan = function() {
+    $cordovaBarcodeScanner
+      .scan()
+      .then(function(barcodeData) {
+        // Success! Barcode data is here
+        alert("We got a barcode\n" +
+                "Result: " + barcodeData.text + "\n" +
+                "Format: " + barcodeData.format + "\n" +
+                "Cancelled: " + barcodeData.cancelled);
+      }, function(error) {
+        // An error occurred
+      });
+  }
+  
 })
 
 .controller('PlaylistCtrl', function($scope, $stateParams, $cordovaCapture, LatestGpsCoordinates) {

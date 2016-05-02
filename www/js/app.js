@@ -69,6 +69,15 @@ angular.module('starter', ['ionic', 'starter.controllers', 'firebase'])
           controller: 'VerifyNestCtrl'
         }
       }
+    })
+    .state('app.verifyScout', {
+      url: '/verify-scout',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/verify-scout.html',
+          controller: 'VerifyScoutCtrl'
+        }
+      }
     });
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/app/playlists');

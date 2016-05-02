@@ -24,7 +24,11 @@
     "cordova-plugin-media-capture",
     "cordova-plugin-inappbrowser",
     "cordova-plugin-geolocation",
-    "cordova-plugin-file-transfer"
+    "cordova-plugin-file-transfer",
+    {
+      "locator": "https://github.com/phonegap/phonegap-plugin-barcodescanner.git",
+      "id": "phonegap-plugin-barcodescanner"
+    }
   ],
   "cordovaPlatforms": [
     "ios",
