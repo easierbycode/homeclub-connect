@@ -76,8 +76,32 @@ angular.module('starter.controllers', ['ngCordova'])
     { title: 'Amazon Echo', id: 1, verificationPage: '/verify-echo' },
     { title: 'Nest Smoke Detector', id: 2, verificationPage: '/verify-nest' },
     { title: 'Phillips Hue', id: 3, verificationPage: '/verify-hue' },
-    { title: 'Scout Alarm', id: 4, verificationPage: '/verify-scout' }
+    { title: 'Scout Alarm', id: 4, verificationPage: '/verify-scout' },
+    { title: 'Leeo Smart Alert', id: 5, verificationPage: '/verify-leeo' }
   ];
+})
+
+.controller('VerifyLeeoCtrl', function($cordovaCamera, $scope, LatestGpsCoordinates) {
+  
+  var options = {
+    quality: 100,
+    destinationType: Camera.DestinationType.DATA_URL,
+    sourceType: Camera.PictureSourceType.PHOTOLIBRARY
+  };
+
+  $scope.selectPhoto = function() {
+    $cordovaCamera.getPicture( options ).then(function(imageData) {
+      var leeoData = {
+        screenshot: imageData,
+        verifyDate: new Date().getTime()
+      };
+      
+      if (LatestGpsCoordinates.get())  leeoData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
+      
+      fb.child( currentUser._id ).child('thirdPartyDevices').update( { leeo: leeoData } );
+    })
+  }
+  
 })
 
 .controller('VerifyScoutCtrl', function($scope, $cordovaBarcodeScanner) {

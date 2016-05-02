@@ -70,12 +70,22 @@ angular.module('starter', ['ionic', 'starter.controllers', 'firebase'])
         }
       }
     })
-    .state('app.verifyScout', {
+  .state('app.verifyScout', {
       url: '/verify-scout',
       views: {
         'menuContent': {
           templateUrl: 'templates/verify-scout.html',
           controller: 'VerifyScoutCtrl'
+        }
+      }
+    })
+    
+  .state('app.verifyLeeo', {
+      url: '/verify-leeo',
+      views: {
+        'menuContent': {
+          templateUrl: 'templates/verify-leeo.html',
+          controller: 'VerifyLeeoCtrl'
         }
       }
     });

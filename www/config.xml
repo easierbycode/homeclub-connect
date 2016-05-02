@@ -30,6 +30,7 @@
   <plugin name="cordova-plugin-geolocation" source="git" spec="https://github.com/apache/cordova-plugin-geolocation"/>
   <plugin name="cordova-plugin-file-transfer" source="git" spec="https://github.com/apache/cordova-plugin-file-transfer.git"/>
   <plugin name="cordova-plugin-barcodescanner" source="git" spec="https://github.com/hypery2k/cordova-barcodescanner-plugin.git"/>
+  <plugin name="cordova-plugin-camera" source="git" spec="https://github.com/apache/cordova-plugin-camera.git"/>
   <platform name="ios">
     <icon src="resources/ios/icon/icon.png" width="57" height="57"/>
     <icon src="resources/ios/icon/icon@2x.png" width="114" height="114"/>
