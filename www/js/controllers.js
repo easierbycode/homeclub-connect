@@ -98,23 +98,35 @@ angular.module('starter.controllers', ['ngCordova'])
       
       if (LatestGpsCoordinates.get())  leeoData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
       
-      fb.child( currentUser._id ).child('thirdPartyDevices').update( { leeo: leeoData } );
+      fb.child( currentUser._id ).child('thirdPartyDevices').update( { leeo: leeoData }, function(err) {
+        alert( 'Screenshot uploaded successfully!' );
+      } );
     })
   }
   
 })
 
-.controller('VerifyScoutCtrl', function($scope, $cordovaBarcodeScanner) {
+.controller('VerifyScoutCtrl', function($scope, $cordovaBarcodeScanner, LatestGpsCoordinates) {
   
   $scope.scan = function() {
     $cordovaBarcodeScanner
       .scan()
       .then(function(barcodeData) {
+
+        if(barcodeData.cancelled)  return;
+
         // Success! Barcode data is here
-        alert("We got a barcode\n" +
-                "Result: " + barcodeData.text + "\n" +
-                "Format: " + barcodeData.format + "\n" +
-                "Cancelled: " + barcodeData.cancelled);
+        alert("Scout hub found\n" +
+                "S/N: " + barcodeData.text);
+                
+        var scoutData = {
+          serialNumber: barcodeData.text,
+          verifyDate: new Date().getTime()
+        };
+        
+        if (LatestGpsCoordinates.get())  scoutData.verifiedFromGpsPosition = LatestGpsCoordinates.get();
+        
+        fb.child( currentUser._id ).child('thirdPartyDevices').update( { scout: scoutData } );
       }, function(error) {
         // An error occurred
       });
